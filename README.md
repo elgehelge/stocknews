@@ -11,13 +11,10 @@ Usage
 -----
 
 Arguments:
-short_name    -- (string) the short name of the stock (e.g. 'GOOG')
-start_date    -- (string formatted as %Y-%m-%d) the start date
-                 - articles published on this date will be included
-end_date      -- (string formatted as %Y-%m-%d) the end date
-                 - articles published on this date will NOT be included
-order_by_date -- (boolean) whether to sort the articles by date or by relevance
-                 - the default value is False
+1. short_name    -- (string) the short name of the stock (e.g. 'GOOG')
+2. start_date    -- (string formatted as %Y-%m-%d) the start date, articles published on this date will be included
+3. end_date      -- (string formatted as %Y-%m-%d) the end date, articles published on this date will NOT be included
+4. order_by_date -- (boolean - default: False) whether to sort the articles by date or by relevance
 
 Example of how to get the most relevant Google Finance articles
 related to the LinkedIn stock (LNKD) between the 15th of august and the 15th of
