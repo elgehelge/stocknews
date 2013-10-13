@@ -1,9 +1,11 @@
 """
 Fetch news related to stocks.
 
-At the moment Google Finance is the
-only source supported, but soon also tweets will be supported. And maybe more
-sources will be suported in the future.
+At the moment Google Finance is the only source supported, but also tweets will
+be supported soon. And maybe more sources will be suported in the future.
+
+Feel free to fork the code on github.com/elgehelge/stocknews and add the
+sources you need!
 
 Arguments:
 short_name    -- (string) the short name of the stock (e.g. 'GOOG')
@@ -63,6 +65,7 @@ import nltk
 import bs4
 
 USER_AGENT = 'StockNewsCrawler/%s' % __version__
+
 
 def get_google_finance_articles(
                                 short_name,

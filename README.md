@@ -5,7 +5,7 @@ A Python module for downloading stock related news.
 
 At the moment Google Finance is the only source supported, but tweets tagged with '$' will be supported soon. And maybe more sources will be suported in the future.
 
-Feel free fork to add the sources you need!!
+Feel free to fork the code and add the sources you need!!!
 
 Usage
 -----
