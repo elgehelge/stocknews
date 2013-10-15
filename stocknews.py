@@ -20,27 +20,39 @@ Example of how to get the most relevant Google Finance articles
 related to the LinkedIn stock (LNKD) between the 15th of august and the 15th of
 september 2013:
 
->>> articles = get_google_finance_articles('LNKD', '2013-08-15', '2013-09-15')
+>>> articles = get_google_finance_articles('LNKD', '2013-09-15', '2013-10-15')
 >>> len(articles)
-58
+68
 >>> most_relevant_article = articles[0]
 >>> least_relevant_article = articles[-1]
 >>> most_relevant_article['relevance']
 1
 >>> least_relevant_article['relevance']
-58
+68
 >>> most_relevant_article['title']
-u'Linkedin Corp (LNKD): Could Linkedin Substitute A Recruitment Agency?'
->>> most_relevant_article['content'][:20]
-'Linkedin Corp (LNKD)'
+u'LinkedIn Customers Allege Company Hacked E-Mail Addresses'
+
+>>> most_relevant_article['link']
+u'http://www.bloomberg.com/news/2013-09-20/linkedin-customers-say-company-
+hacked-their-e-mail-address-books.html'
+
+>>> most_relevant_article['content'][:200] + '...'
+u'\n\n\nLinkedIn Corp. (LNKD), owner of the\nworld\u2019s most popular
+professional-networking website, was sued\nby customers who claim the company
+appropriated their identities\nfor marketing purposes by hacking...'
+
+>>> most_relevant_article['wordcounts'].most_common()[:10]
+[(u',', 67), (u'.', 46), (u'linkedin', 31), (u'e-m', 24), (u'ail', 24),
+(u'said', 19), (u'address', 10), (u'account', 9), (u'compani', 9),
+(u'complaint', 8)]
 
 Example of how to get the earliest and the latest Google Finance article
 related to the same stock and within the same time frame as above:
 
->>> articles = get_google_finance_articles('LNKD', '2013-08-15', '2013-09-15',
-...                                        True)
+>>> articles = get_google_finance_articles('LNKD', '2013-09-15', '2013-10-15',
+...                                        order_by_date=True)
 >>> len(articles)
-58
+68
 >>> earliest_article = articles[0]
 >>> latest_article = articles[-1]
 >>> import time
@@ -64,8 +76,8 @@ import feedparser
 import nltk
 import bs4
 
-USER_AGENT = 'StockNewsCrawler/%s' % __version__
-
+USER_AGENT = 'StockNewsCrawler/%s' % __version__ + \
+             'Source code available on github.com/elgehelge/stocknews'
 
 def get_google_finance_articles(
                                 short_name,
@@ -83,6 +95,7 @@ def get_google_finance_articles(
     - 'link'
     - 'relevance'
     - 'content'
+    - 'raw_html'
     
     By default the list is sorted according to relevance (defined by Google
     Finance), but can be sorted by date if preferred.
