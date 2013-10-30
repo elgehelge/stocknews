@@ -63,7 +63,12 @@ related to the same stock and within the same time frame as above:
 
 """
 
-__version__ = 1.0
+__version__ = 1.1
+# Latest update:
+# - Better tokentizing
+# - Catching IncompleteRead exception
+# - Timeouting url request after 10 seconds
+# - Not printing while running in parallel (caused an error sometimes)
 
 from threading import Thread
 from collections import Counter
@@ -71,6 +76,8 @@ from operator import itemgetter
 import urllib
 import urllib2
 import re
+from socket import timeout
+from httplib import IncompleteRead
 
 import feedparser
 import nltk
@@ -116,8 +123,7 @@ def get_google_finance_articles(
     
     # Fetch articles in parallel
     number_of_articles = len(article_list)
-    print "Fetching %i articles online." % number_of_articles
-    print "('.' = success, 'x' = fail)"
+    print "Fetching %i articles online..." % number_of_articles
     opener = urllib2.build_opener()
     opener.addheaders = [("User-agent", USER_AGENT)]
     def fetch_online(article):
@@ -129,11 +135,9 @@ def get_google_finance_articles(
         
         """
         try:
-            raw_html = opener.open(article['link']).read()
-            print '.',
-        except urllib2.URLError:
+            raw_html = opener.open(article['link'], timeout = 10).read()
+        except (urllib2.URLError, timeout, IncompleteRead):
             article_list.remove(article)
-            print 'x',
         else:
             article['raw_html'] = raw_html  
             article['content'] = _get_website_content(raw_html)
@@ -143,7 +147,6 @@ def get_google_finance_articles(
         thread.start()
     for thread in threads:
         thread.join()
-    print '' # newline
     print "%i Articles fetched, %i failed." % (len(article_list),
                                                number_of_articles -
                                                len(article_list))
@@ -151,7 +154,7 @@ def get_google_finance_articles(
     # Count words and store 'wordcounts' in dictionary
     for article in article_list:
         # Concatenate titles and content
-        text = article['title'].encode('utf8') + article['content']
+        text = article['title'].encode('utf8') + article['content'].encode('utf8')
         # Normalize (tokenize, lowercase, stem, remove stopwords)
         word_list = _word_normalization(text)
         # Count words
@@ -241,18 +244,13 @@ def _word_normalization(text):
     
     
 def _tokenization(text):
-    """Perform a tokenization as in (Bird et al., 2009, page 111)"""
+    """Tokenization a string. Remove non-alphanumeric characters and split on
+    space"""
+    alphanumeric = re.sub(r'[^\w\s]+', '', text)
     pattern = r"""(?ux)                 # Set Unicode and verbose flag
-              (?:[^\W\d_]\.)+                     # Abbreviation
-              | [^\W\d_]+(?:-[^\W\d_])*(?:'s)?    # Words with optional hyphens
-              | \d{4}                             # Year
-              | \d{1,3}(?:,\d{3})*                # Number
-              | \$\d+(?:\.\d{2})?                 # Dollars
-              | \d{1,3}(?:\.\d+)?\s%              # Percentage
-              | \.\.\.                            # Ellipsis
-              | [.,;"'?!():-_`/]                  #
+              \w+
               """
-    return nltk.regexp_tokenize(text, pattern)
+    return nltk.regexp_tokenize(alphanumeric, pattern)
 
 def _get_website_content(html, return_content_only=True):
     """
@@ -260,7 +258,7 @@ def _get_website_content(html, return_content_only=True):
     is defined by a simple regex.
     """
     word_regex = r" [a-zA-Z]+" # Space followed by letters
-    text_elements = ['p', 'a', 'br', 'span', 'b', 'big', 'i', 'small', 'tt',
+    text_elements =  ['p', 'a', 'br', 'span', 'b', 'big', 'i', 'small', 'tt',
                      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8',
                      'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd',
                      'strong', 'samp', 'q', 'bdo', 'sub', 'sup']
